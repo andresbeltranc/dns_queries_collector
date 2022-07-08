@@ -10,4 +10,4 @@
   9. You can find a sample file here: `https://bit.ly/33ZEnHy`
 
 # Explain what is the computational complexity of your ranking algorithm
-the algorithmic complexity of the Ranking algorithm is O(n) because it can be said that the ranking algorithm is a liniar time algorithm because when runnning the algorithm the time increases linearly with the size of the input in this case the amount of recorst that will be analyzed.
+the algorithmic complexity of the Ranking algorithm is O(n) because it can be said that the ranking algorithm is a liniar time algorithm because when runnning the algorithm the time increases linearly with the size of the input in this case the amount of records that will be analyzed.
