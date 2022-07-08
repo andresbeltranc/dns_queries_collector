@@ -1,5 +1,5 @@
 # dns_queries_collector
-## Getting started (instructions on how to run your script) 
+## Getting started (instructions on how to run the script) 
   1. Clone this repository: `git clone <repository>`
   2. Change to the repository directory: `cd dns_queries_collector`
   3. If you want to use v-env: `python -m venv <name-env>`
