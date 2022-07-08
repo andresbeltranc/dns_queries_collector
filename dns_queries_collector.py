@@ -1,13 +1,10 @@
-from cmath import exp
 import requests
 import pandas as pd
 import json
-from datetime import datetime
-
+import sys
 URL = "https://api.lumu.io"
 LUMU_CLIENT_KEY = "d39a0f19-7278-4a64-a255-b7646d1ace80"
 COLLECTOR_ID = "5ab55d08-ae72-4017-a41c-d9d735360288"
-dict_example = '[{"timestamp": "2022-07-07T16:34:13.003000Z","name": "www.example.com","client_ip": "192.168.0.103","client_name": "MACHINE-0987","type": "A"},{"timestamp": "2022-07-07T16:34:13.003000Z","name": "www.example.com","client_ip": "192.168.0.103","client_name": "MACHINE-0987","type": "A"}]'
 
 def query_request(queries):
     try:
@@ -86,50 +83,56 @@ def iso_format_date(date_time_str):
 
 
 if __name__ == "__main__":
+    args = sys.argv[1:]
+    if len(args) == 2 and args[0] == '--pathfile':
+        queries_df = read_file(args[1])
+        parsed_queries, statistic_ip, statistic_host = parse_queries(queries_df)
+        statistic_sorted_ip = sorted(statistic_ip, key = statistic_ip.get, reverse=True)[:5]
+        statistic_sorted_host = sorted(statistic_host, key = statistic_host.get, reverse=True)[:5]
+        chunked_queries = chunk_queries(parsed_queries)
+        success, error = send_requests(chunked_queries)
+        print("Total Records ",len(parsed_queries))
+        print(" ")
+        print("Client IPs Rank")
+        print("------------------------------------")
+        ips = []
+        count = []
+        percentage = []
+        for s_ip in statistic_sorted_ip:
+            ips.append(s_ip)
+            count.append(statistic_ip[s_ip][0])
+            percentage.append(statistic_ip[s_ip][1])
+            #print(s_ip," ",statistic_ip[s_ip][0]," ",statistic_ip[s_ip][1])
+        dict_ip = {
+            "IP":ips,
+            "count":count,
+            "percentage":percentage
+        }
+        df_ip = pd.DataFrame(dict_ip)
+        print(df_ip)
+        print("------------------------------------")
+        print(" ")
 
-    queries_df = read_file("./queries")
-    parsed_queries, statistic_ip, statistic_host = parse_queries(queries_df)
-    statistic_sorted_ip = sorted(statistic_ip, key = statistic_ip.get, reverse=True)[:5]
-    statistic_sorted_host = sorted(statistic_host, key = statistic_host.get, reverse=True)[:5]
-    #chunked_queries = chunk_queries(parsed_queries)
-    #success, error = send_requests(chunked_queries)
-    print("Total Records ",len(parsed_queries))
-    print(" ")
-    print("Client IPs Rank")
-    print("------------------------------------")
-    ips = []
-    count = []
-    percentage = []
-    for s_ip in statistic_sorted_ip:
-        ips.append(s_ip)
-        count.append(statistic_ip[s_ip][0])
-        percentage.append(statistic_ip[s_ip][1])
-        #print(s_ip," ",statistic_ip[s_ip][0]," ",statistic_ip[s_ip][1])
-    dict_ip = {
-        "IP":ips,
-        "count":count,
-        "percentage":percentage
-    }
-    df_ip = pd.DataFrame(dict_ip)
-    print(df_ip)
-    print("------------------------------------")
-    print(" ")
-
-    print("Host Rank")
-    print("------------------------------------")
-    hosts = []
-    count_h = []
-    percentage_h = []
-    for s_host in statistic_sorted_host:
-        hosts.append(s_host)
-        count_h.append(statistic_host[s_host][0])
-        percentage_h.append(statistic_host[s_host][1])
-    
-    dict_host = {
-        "Host":hosts,
-        "count":count_h,
-        "percentage":percentage_h
-    }
-    df_host = pd.DataFrame(dict_host)
-    print(df_host)
-    print("------------------------------------")
+        print("Host Rank")
+        print("------------------------------------")
+        hosts = []
+        count_h = []
+        percentage_h = []
+        for s_host in statistic_sorted_host:
+            hosts.append(s_host)
+            count_h.append(statistic_host[s_host][0])
+            percentage_h.append(statistic_host[s_host][1])
+        
+        dict_host = {
+            "Host":hosts,
+            "count":count_h,
+            "percentage":percentage_h
+        }
+        df_host = pd.DataFrame(dict_host)
+        print(df_host)
+        print("------------------------------------")
+        print("Queries send to Custom Collector API")
+        print(" ")
+        print("requests sent successfully :",success)
+        print("requests sent unsuccessfully :",error)
+        print("------------------------------------")
